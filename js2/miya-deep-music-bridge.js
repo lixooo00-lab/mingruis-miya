@@ -316,12 +316,13 @@
     var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
     var timer = controller ? setTimeout(function () { controller.abort(); }, timeoutMs) : null;
 
-    return fetch(base + '/chat/completions', {
+    var proxyBase = resolved.proxyBaseUrl ? trim(resolved.proxyBaseUrl) : null;
+    var fetchBase = proxyBase || base;
+    var fetchHeaders = { 'Content-Type': 'application/json' };
+    if (!proxyBase) { fetchHeaders['Authorization'] = 'Bearer ' + key; }
+    return fetch(fetchBase + '/chat/completions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + key
-      },
+      headers: fetchHeaders,
       body: JSON.stringify(payload),
       signal: controller ? controller.signal : undefined
     }).then(function (r) {
